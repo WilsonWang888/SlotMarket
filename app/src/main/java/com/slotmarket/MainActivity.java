@@ -74,9 +74,16 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private int printRand(){
+        Random rand = new Random();
+
+        int n = rand.nextInt(symbols.size());
+        return n;
+    }
+
     public void generateStock(View view){
         if(filter.equals("")){
-            currentStock = symbols.get((int)(Math.random() * symbols.size())).getSymbol();
+            currentStock = symbols.get(printRand()).getSymbol();
         } else{
             List<StockSymbol> enabledSymbols = new ArrayList<>();
             for(int i = 0; i < symbols.size(); i++){
@@ -91,3 +98,4 @@ public class MainActivity extends AppCompatActivity {
         textView.setText(currentStock);
     }
 }
+
