@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
         final TextView textView = findViewById(R.id.load_symbols_message);
         filter = "";
 
-        JsonArrayRequest jsonObjectRequest = new JsonArrayRequest(
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET,
                 url,
                 null,
@@ -70,20 +70,18 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-        queue.add(jsonObjectRequest);
+        queue.add(jsonArrayRequest);
 
     }
 
-    private int printRand(){
+    private int pickRandom(List<StockSymbol> list){
         Random rand = new Random();
-
-        int n = rand.nextInt(symbols.size());
-        return n;
+        return rand.nextInt(list.size());
     }
 
     public void generateStock(View view){
         if(filter.equals("")){
-            currentStock = symbols.get(printRand()).getSymbol();
+            currentStock = symbols.get(pickRandom(symbols)).getSymbol();
         } else{
             List<StockSymbol> enabledSymbols = new ArrayList<>();
             for(int i = 0; i < symbols.size(); i++){
@@ -91,9 +89,8 @@ public class MainActivity extends AppCompatActivity {
                     enabledSymbols.add(symbols.get(i));
                 }
             }
-            currentStock = enabledSymbols.get((int)(Math.random() * enabledSymbols.size())).getSymbol();
+            currentStock = enabledSymbols.get(pickRandom(enabledSymbols)).getSymbol();
         }
-
         TextView textView = findViewById(R.id.stock_symbol);
         textView.setText(currentStock);
     }
