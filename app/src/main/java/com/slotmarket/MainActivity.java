@@ -19,6 +19,7 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,10 +27,10 @@ import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
-    RequestQueue queue;
+    public RequestQueue queue;
     List<StockSymbol> symbols;
     String filter;
-    String currentStock;
+    StockInfo currentStock;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         queue = Volley.newRequestQueue(getApplicationContext());
+        currentStock = new StockInfo();
         String url = "https://cloud.iexapis.com/stable/ref-data/symbols?token=pk_5e6f01a62c7e43c2baac7d44cd2d5aa8";
         final TextView textView = findViewById(R.id.load_symbols_message);
         filter = "";
@@ -53,8 +55,10 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             for(int i = 0; i < response.length(); i++){
                                 JSONObject stock = response.getJSONObject(i);
-                                symbols.add(new StockSymbol(stock.getString("symbol"),
-                                                            stock.getString("exchange")));
+                                if(stock.getBoolean("isEnabled")) {
+                                    symbols.add(new StockSymbol(stock.getString("symbol"),
+                                            stock.getString("exchange")));
+                                }
                             }
                             textView.setText("Loaded Successfully");
                         } catch (JSONException e) {
@@ -69,9 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 });
-
         queue.add(jsonArrayRequest);
-
     }
 
     private int pickRandom(List<StockSymbol> list){
@@ -81,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void generateStock(View view){
         if(filter.equals("")){
-            currentStock = symbols.get(pickRandom(symbols)).getSymbol();
+            currentStock.setSymbol(symbols.get(pickRandom(symbols)).getSymbol());
         } else{
             List<StockSymbol> enabledSymbols = new ArrayList<>();
             for(int i = 0; i < symbols.size(); i++){
@@ -89,10 +91,22 @@ public class MainActivity extends AppCompatActivity {
                     enabledSymbols.add(symbols.get(i));
                 }
             }
-            currentStock = enabledSymbols.get(pickRandom(enabledSymbols)).getSymbol();
+            currentStock.setSymbol(enabledSymbols.get(pickRandom(enabledSymbols)).getSymbol());
         }
-        TextView textView = findViewById(R.id.stock_symbol);
-        textView.setText(currentStock);
+        currentStock.updateInfo(queue);
+        updateView();
+    }
+
+    public void updateView(){
+        TextView symbolView = findViewById(R.id.stock_symbol);
+        symbolView.setText(currentStock.getStock());
+        TextView stockView = findViewById(R.id.stock_name);
+        stockView.setText(currentStock.getStock());
+        TextView priceView = findViewById(R.id.stock_price);
+        String currPrice = currentStock.getValue() + "";
+        priceView.setText(currPrice);
     }
 }
+
+
 
